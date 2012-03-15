@@ -21,8 +21,10 @@ import org.springframework.test.context.transaction.TransactionConfiguration;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.jta.JtaTransactionManager;
 
+import javax.jms.ConnectionFactory;
 import javax.jms.JMSException;
 import javax.jms.Message;
+import javax.jms.Queue;
 import javax.sql.DataSource;
 import javax.transaction.SystemException;
 import java.sql.SQLException;
@@ -42,6 +44,7 @@ public class XAResourceFailBaseTC {
     protected JtaTransactionManager jtaTransactionManager;
     @Autowired
     protected DataSource dataSource;
+
     private TestContextManager testContextManager;
     protected User user;
     @Before
@@ -51,11 +54,10 @@ public class XAResourceFailBaseTC {
         user.setName("me");
         user.setPasswd("dont_tell_ya");
 
-        //this is where the magic happens, we actually do "by hand" what the spring runner would do for us,
-        // read the JavaDoc for the class bellow to know exactly what it does, the method names are quite accurate though
         this.testContextManager = new TestContextManager(getClass());
         this.testContextManager.prepareTestInstance(this);
-        VerificationUtil.clearDatabase(dataSource);
+
+        VerificationUtil.clearDatabase();
         VerificationUtil.deleteAllMessagesFromQueue();
     }
     @After
@@ -65,7 +67,7 @@ public class XAResourceFailBaseTC {
     }
 
     protected void afterTransactionDatabaseStateChecks() throws SQLException, SystemException {
-        List<User> userList = VerificationUtil.getObjectsFromDatabase(dataSource);
+        List<User> userList = VerificationUtil.getObjectsFromDatabase();
         LOGGER.debug("List of users after transaction : "+userList);
         Assert.assertEquals(1, userList.size());
         Assert.assertEquals(userList.get(0).getUserId(),user.getUserId());

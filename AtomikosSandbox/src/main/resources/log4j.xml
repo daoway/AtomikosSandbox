@@ -32,6 +32,9 @@
     <logger name="atomikos">
         <level value="WARN"/>
     </logger-->
+    <logger name="org.apache.activemq">
+        <level value="WARN"/>
+    </logger>
 
     <root>
         <priority value="DEBUG"/>
